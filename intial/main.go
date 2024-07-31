@@ -369,4 +369,42 @@ func slicesAdvArr() {
 	}
 
 	fmt.Println("2d :", twoD)
+
+	// Growing slices (the copy and append functions)¶
+	var s1 []byte
+	s1 = make([]byte, 5, 5)
+	t3 := make([]byte, len(s1), cap(s1)+1) // + 1 if s1 length is 0
+
+	for i := range len(s1) {
+		t3[i] = s1[i]
+	}
+	fmt.Println("copied :: ", t3)
+
+	// copy function
+	t4 := make([]byte, len(s1), cap(s1)+1)
+	copy(t4, s1)
+	fmt.Println("copied with internal copy fucntion :: ", t4)
+
+	// A common operation is to append data to the end of a slice.
+
+	appendByte := func(slice []byte, data ...byte) []byte {
+		m := len(slice)
+		n := m + len(data)
+
+		if n >= cap(slice) { // if necessary, reallocate
+			// allocate double what's needed, for future growth.
+			newSlice := make([]byte, (n+1)*2)
+			copy(newSlice, slice)
+			slice = newSlice
+		}
+
+		slice = slice[0:n]
+		copy(slice[m:n], data)
+		return slice
+
+	}
+	s1 = appendByte(s1, 23, 22, 43, 11)
+	fmt.Println(s1)
+	s1 = appendByte(s1, 21)
+	fmt.Println(s1)
 }
