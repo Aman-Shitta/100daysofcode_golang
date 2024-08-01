@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"math"
 	"runtime"
 	"slices"
@@ -20,6 +21,8 @@ func main() {
 	switch_statement()
 	arrays()
 	slicesAdvArr()
+	mapss()
+	range_fun()
 }
 
 func function_call() {
@@ -407,4 +410,116 @@ func slicesAdvArr() {
 	fmt.Println(s1)
 	s1 = appendByte(s1, 21)
 	fmt.Println(s1)
+}
+
+// maps
+func mapss() {
+	function_call()
+
+	// Maps are Go’s built-in associative data type (sometimes called hashes or dicts in other languages).
+	m := make(map[string]int)
+
+	m["k1"] = 1
+	m["k2"] = 2
+
+	fmt.Println("map : ", m)
+
+	// Get a value for a key with name[key].
+	v1 := m["k1"]
+	fmt.Println("v1 : ", v1)
+
+	// If the key doesn’t exist, the zero value of the value type is returned.
+	v3 := m["k3"]
+	fmt.Println("v3 : ", v3)
+
+	// The builtin len returns the number of key/value pairs when called on a map.
+	fmt.Println("len m :", len(m))
+
+	// The builtin delete removes key/value pairs from a map.
+	delete(m, "k2")
+	fmt.Println("del k2 : ", m)
+
+	// To remove all key/value pairs from a map, use the clear builtin.
+	clear(m)
+	fmt.Println("clear : m : ", m)
+
+	// The optional second return value when getting a value from a map indicates if the key was present in the map.
+	// This can be used to disambiguate between missing keys and keys with zero values like 0 or "".
+	// Here we didn’t need the value itself, so we ignored it with the blank identifier _.
+
+	v3, ok := m["k3"]
+
+	if ok {
+		fmt.Println("v3 :", v3)
+	} else {
+		fmt.Println("Key not Present")
+	}
+
+	// You can also declare and initialize a new map in the same line with this syntax.
+	m1 := map[string]int{
+		"k1": 1,
+		"k2": 2,
+	}
+
+	fmt.Println("single liner : ", m1)
+
+	n2 := map[string]int{"foo": 1, "bar": 2}
+
+	if maps.Equal(m1, n2) {
+		fmt.Println("m1 == n2")
+	} else {
+		fmt.Println("m1 != n2")
+	}
+}
+
+// Range
+
+func range_fun() {
+	function_call()
+
+	// range iterates over elements in a variety of data structures. Let’s see how to use range with some of the data structures we’ve already learned
+
+	nums := []int{
+		1, 2, 3, 4, 5,
+	}
+
+	// Here we use range to sum the numbers in a slice. Arrays work like this too.
+	sum := 0
+	for _, i := range nums {
+		sum += i
+	}
+	fmt.Println("sum : ", sum)
+
+	// range on arrays and slices provides both the index and value for each entry.
+	// Above we didn’t need the index, so we ignored it with the blank identifier _. Sometimes we actually want the indexes though.
+
+	for idx, num := range nums {
+		if num == 3 {
+			fmt.Println(num, "is at index : ", idx)
+		}
+	}
+
+	// range on map iterates over key/value pairs.
+
+	m := map[string]string{
+		"a": "A",
+		"b": "B",
+		"c": "C",
+	}
+
+	for key, value := range m {
+		fmt.Println(key, " --> ", value)
+	}
+
+	// range can also iterate over just the keys of a map.
+
+	for k := range m {
+		fmt.Println("KEY :: ", k, "has Value :: ", m[k])
+	}
+
+	// range on strings iterates over Unicode code points. The first value is the starting byte index of the rune and the second the rune itself. See Strings and Runes for more details.
+
+	for i, c := range "golang" {
+		fmt.Println(i, c)
+	}
 }
