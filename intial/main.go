@@ -23,6 +23,9 @@ func main() {
 	slicesAdvArr()
 	mapss()
 	range_fun()
+	function()
+	multipleReturnValue()
+	vardiacFunc()
 }
 
 func function_call() {
@@ -522,4 +525,66 @@ func range_fun() {
 	for i, c := range "golang" {
 		fmt.Println(i, c)
 	}
+}
+
+// functions
+
+func function() {
+	function_call()
+	// Functions are central in Go. We’ll learn about functions with a few different examples.
+
+	plus := func(a int, b int) int {
+
+		return a + b
+	}
+
+	fmt.Println("funcrtion call: ", plus(1, 2))
+
+	plusPlus := func(a, b, c int) int {
+		return a + b + c
+	}
+
+	fmt.Println("Single value type declaration :: ", plusPlus(1, 2, 3))
+}
+
+// Multiple Return Values
+
+func multipleReturnValue() {
+	function_call()
+
+	// Go has built-in support for multiple return values.
+	// This feature is used often in idiomatic Go,
+	// for example to return both result and error values from a function.
+
+	vals := func() (int, int) {
+		return 1, 2
+	}
+
+	a, b := vals()
+
+	fmt.Println("Multiple return values :: ", a, b)
+}
+
+// variadic-functions
+func vardiacFunc() {
+	function_call()
+
+	// Variadic functions can be called with any number of trailing arguments.
+	// For example, fmt.Println is a common variadic function.
+
+	sum := func(vals ...int) int {
+		sums := 0
+		for idx, i := range vals {
+			fmt.Println("idx : ", idx)
+			sums += i
+		}
+
+		return sums
+	}
+
+	total := sum(1, 2)
+	fmt.Println("total ::", total)
+
+	total = sum(1, 2, 3, 4)
+	fmt.Println("total ::", total)
 }
