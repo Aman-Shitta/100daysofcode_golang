@@ -26,6 +26,8 @@ func main() {
 	function()
 	multipleReturnValue()
 	vardiacFunc()
+	closures()
+	recursion()
 }
 
 func function_call() {
@@ -587,4 +589,59 @@ func vardiacFunc() {
 
 	total = sum(1, 2, 3, 4)
 	fmt.Println("total ::", total)
+}
+
+// closures
+
+// This function intSeq returns another function, which we define anonymously in the body of intSeq. The returned function closes over the variable i to form a closure.
+
+func intSeq() func() int {
+	i := 0
+	return func() int {
+		i++
+		return i
+	}
+}
+
+func closures() {
+	function_call()
+
+	// Go supports anonymous functions, which can form closures.
+	// Anonymous functions are useful when you want to define a function inline without having to name it.
+
+	nextInt := intSeq()
+
+	fmt.Println(nextInt())
+	fmt.Println(nextInt())
+	fmt.Println(nextInt())
+	fmt.Println(nextInt())
+
+	nextInts := intSeq()
+	fmt.Println(nextInts())
+}
+
+// Recursion
+func fact(n uint64) uint64 {
+	if n == 0 || n == 1 {
+		return 1
+	} else {
+		return n * fact(n-1)
+	}
+
+}
+func recursion() {
+	function_call()
+
+	fmt.Println("Factorial of 7 :: ", fact((7)))
+
+	var fib func(n int) int
+
+	fib = func(n int) int {
+		if n < 2 {
+			return n
+		} else {
+			return fib(n-1) + fib(n-2)
+		}
+	}
+	fmt.Println("fib of 10 :: ", fib(10))
 }
