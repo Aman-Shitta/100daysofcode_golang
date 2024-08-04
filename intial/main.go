@@ -28,6 +28,7 @@ func main() {
 	vardiacFunc()
 	closures()
 	recursion()
+	pointers()
 }
 
 func function_call() {
@@ -644,4 +645,32 @@ func recursion() {
 		}
 	}
 	fmt.Println("fib of 10 :: ", fib(10))
+}
+
+// Pointers
+
+// Go supports pointers,
+// allowing you to pass references to values and records within your program.
+
+func pointers() {
+	zeroval := func(ival int) {
+		ival = 0
+	}
+
+	zeroptr := func(iptr *int) {
+		*iptr = 0
+	}
+
+	i := 1
+
+	fmt.Println("initial :", i)
+
+	zeroval(i)
+	fmt.Println("zeroval :", i)
+
+	zeroptr(&i)
+	fmt.Println("zeroptr :", i)
+
+	fmt.Println("pointer:", &i)
+
 }
