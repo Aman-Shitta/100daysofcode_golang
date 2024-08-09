@@ -31,6 +31,8 @@ func main() {
 	recursion()
 	pointers()
 	stringsAndRunes()
+	String()
+	structs()
 }
 
 func function_call() {
@@ -725,4 +727,141 @@ func examineRune(r rune) {
 	} else if r == 'ส' {
 		fmt.Println("found so sua")
 	}
+}
+
+// String
+
+func String() {
+	function_call()
+
+	// In Go, a string is in effect a read-only slice of bytes.
+	// Here is a string literal (more about those soon) \
+	// that uses the \xNN notation to define a string constant holding some peculiar byte values.
+	// (Of course, bytes range from hexadecimal values 00 through FF, inclusive.)
+
+	const sample = "\xde\xad\xbe\xef\x41\x8c\x98"
+	// Because some of the bytes in our sample string are not valid ASCII, not even valid UTF-8,
+	// printing the string directly will produce ugly output. The simple print statement
+	fmt.Println("sample :", sample)
+
+	// To find out what that string really holds, we need to take it apart and examine the pieces.
+
+	// This loop iterates over each byte of the string.
+	// thus printing hexadecimal representation of each byte.
+	for i := 0; i < len(sample); i++ {
+		fmt.Printf("%x", sample[i])
+	}
+	fmt.Println()
+	// A shorter way to generate presentable output for a messy string is to use the %x (hexadecimal) format verb of fmt.Printf.
+	//  It just dumps out the sequential bytes of the string as hexadecimal digits, two per byte
+	fmt.Printf("%x\n", sample)
+
+	// A nice trick is to use the “space” flag in that format, \
+	// putting a space between the % and the x. Compare the format string used here to the one above,
+	fmt.Printf("% x\n", sample)
+
+	// There’s more. The %q (quoted) verb will escape any non-printable byte sequences in a string so the output is unambiguous.
+
+	fmt.Printf("%q\n", sample)
+
+	fmt.Printf("%+q\n", sample)
+
+	// each rune respsenets a unicode code point
+	// If a character consists of multiple bytes (such as some non-ASCII characters),
+	// the char variable will be a rune representing the entire character, and %x will print the hexadecimal representation of the rune's Unicode code point.
+	for _, char := range sample {
+		fmt.Printf("%x ", char)
+	}
+
+	// [Exercise: Modify the examples above to use a slice of bytes instead of a string. Hint: Use a conversion to create the slice.]
+
+	// Define the sample as a byte slice
+	fmt.Println("\n[Exercise: Modify the examples above to use a slice of bytes instead of a string. Hint: Use a conversion to create the slice.]")
+	sampleB := []byte{0xde, 0xad, 0xbe, 0xef, 0x41, 0x8c, 0x98}
+
+	// Print each byte in hexadecimal format
+	fmt.Print("Hex output: ")
+	for _, b := range sampleB {
+		fmt.Printf("%x ", b)
+	}
+	fmt.Println()
+
+	// [Exercise: Loop over the string using the %q format on each byte. What does the output tell you?]
+	fmt.Println("[Exercise: Loop over the string using the %q format on each byte. What does the output tell you?]")
+	for i := 0; i < len(sample); i++ {
+		fmt.Printf("%q\n", sample[i])
+	}
+
+}
+
+// structs
+
+func structs() {
+	function_call()
+	// Go’s structs are typed collections of fields. They’re useful for grouping data together to form records.
+
+	// This person struct type has name and age fields.
+	type person struct {
+		name string
+		age  int
+	}
+
+	// This syntax creates a new struct.
+
+	fmt.Println(person{"Aman", 27})
+
+	// You can name the fields when initializing a struct.
+	fmt.Println(person{name: "Aman", age: 27})
+
+	// Omitted fields will be zero-valued.
+	fmt.Println(person{name: "Aman"})
+
+	// An & prefix yields a pointer to the struct.
+	fmt.Println(&person{name: "*Aman", age: 27})
+
+	// It’s idiomatic to encapsulate new struct creation in constructor functions
+
+	// newPerson constructs a new person struct with the given name.
+
+	newPerson := func(name string) *person {
+		// You can safely return a pointer to local variable
+		// as a local variable will survive the scope of the function.
+		p := person{name: name}
+		p.age = 18
+
+		return &p
+	}
+
+	fmt.Println(newPerson("Aman"))
+
+	// Access struct fields with a dot.
+	s := person{name: "Aman", age: 27}
+
+	fmt.Println(s.name)
+	fmt.Println(s.age)
+
+	// You can also use dots with struct pointers
+	// the pointers are automatically dereferenced.
+	sp := &s
+	fmt.Println(sp.age)
+
+	// Structs are mutable.
+	sp.age = 51
+	s.name = "Aman"
+
+	fmt.Println(s)
+	fmt.Println(sp)
+
+	// If a struct type is only used for a single value,
+	// we don’t have to give it a name.
+	// The value can have an anonymous struct type.
+	// This technique is commonly used for table-driven tests.
+
+	dog := struct {
+		name   string
+		isGood bool
+	}{"Rex", false}
+
+	fmt.Println(dog)
+
 }
