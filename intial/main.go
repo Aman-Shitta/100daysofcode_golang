@@ -33,6 +33,8 @@ func main() {
 	stringsAndRunes()
 	String()
 	structs()
+	methods()
+	interfaces()
 }
 
 func function_call() {
@@ -864,4 +866,91 @@ func structs() {
 
 	fmt.Println(dog)
 
+}
+
+// methods
+
+type rect struct {
+	length int
+	height int
+}
+
+// This area method has a receiver type of *rect.
+func (r *rect) area() int {
+	return r.length * r.height
+}
+
+// Methods can be defined for either pointer or value receiver types.
+// Here’s an example of a value receiver.
+func (r rect) perim() int {
+	return 2*r.length + 2*r.height
+}
+
+func methods() {
+	function_call()
+
+	// Go supports methods defined on struct types.
+
+	r := rect{10, 10}
+
+	// Here we call the 2 methods defined for our struct.
+
+	fmt.Println("Area :", r.area())
+	fmt.Println("Perim :", r.perim())
+
+	rp := &r
+
+	fmt.Println("&Area :", rp.area())
+	fmt.Println("&Perim :", rp.perim())
+
+}
+
+// interfaces
+
+// Interfaces are named collections of method signatures.
+
+type geometry interface {
+	areai() float64
+	perimi() float64
+}
+
+type rect1 struct {
+	length float64
+	height float64
+}
+
+type circle struct {
+	radius float64
+}
+
+func (r rect1) areai() float64 {
+	return r.length * r.height
+}
+
+func (r rect1) perimi() float64 {
+	return (2 * r.length) + (2 * r.height)
+}
+
+func (c circle) areai() float64 {
+	return math.Pi * c.radius * c.radius
+}
+
+func (c circle) perimi() float64 {
+	return 2 * math.Pi * c.radius
+}
+
+func measure(g geometry) {
+	fmt.Println(g)
+	fmt.Println(g.areai())
+	fmt.Println(g.perimi())
+}
+
+func interfaces() {
+	function_call()
+
+	newRect1 := rect1{10.0, 10.0}
+	measure(newRect1)
+
+	newCircle := circle{5.5}
+	measure(newCircle)
 }
