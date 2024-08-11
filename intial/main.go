@@ -31,10 +31,11 @@ func main() {
 	recursion()
 	pointers()
 	stringsAndRunes()
-	String()
+	_String()
 	structs()
 	methods()
 	interfaces()
+	enums()
 }
 
 func function_call() {
@@ -733,7 +734,7 @@ func examineRune(r rune) {
 
 // String
 
-func String() {
+func _String() {
 	function_call()
 
 	// In Go, a string is in effect a read-only slice of bytes.
@@ -953,4 +954,72 @@ func interfaces() {
 
 	newCircle := circle{5.5}
 	measure(newCircle)
+}
+
+// Enums
+
+// Our enum type ServerState has an underlying int type.
+type ServerState int
+
+// The possible values for ServerState are defined as constants.
+// The special keyword iota generates successive constant values automatically;
+// in this case 0, 1, 2 and so on.
+const (
+	StateIdle = iota
+	StateConnected
+	StateError
+	StateRetrying
+)
+
+// By implementing the fmt.Stringer interface,
+// values of ServerState can be printed out or converted to strings.
+var stateName = map[ServerState]string{
+	StateIdle:      "idle",
+	StateConnected: "connected",
+	StateError:     "error",
+	StateRetrying:  "retrying",
+}
+
+// Stringer is a tool to automate the creation of methods that satisfy the fmt.Stringer interface.
+// Given the name of a (signed or unsigned) integer type T that has constants defined,
+// stringer will create a new self-contained Go source file implementing
+
+// https://pkg.go.dev/golang.org/x/tools/cmd/stringer
+func (ss ServerState) String() string {
+	return stateName[ss]
+}
+
+// If we have a value of type int,
+// we cannot pass it to transition - the compiler will complain about type mismatch.
+// This provides some degree of compile-time type safety for enums.
+func transition(s ServerState) ServerState {
+
+	// transition emulates a state transition for a server;
+	// it takes the existing state and returns a new state.
+	switch s {
+	case StateIdle:
+		return StateConnected
+	case StateConnected, StateRetrying:
+		return StateIdle
+	case StateError:
+		return StateError
+	default:
+		panic(fmt.Errorf("unknown state: %s", s))
+	}
+}
+
+func enums() {
+
+	function_call()
+	// Suppose we check some predicates here to determine the next state…
+	ns := transition(StateIdle)
+	fmt.Println(ns)
+
+	ns2 := transition(ns)
+	fmt.Println(ns2)
+
+	var a ServerState = 5
+	ns3 := transition(a)
+	fmt.Println(ns3)
+
 }
