@@ -36,6 +36,7 @@ func main() {
 	methods()
 	interfaces()
 	enums()
+	struct_embedding()
 }
 
 func function_call() {
@@ -1018,8 +1019,58 @@ func enums() {
 	ns2 := transition(ns)
 	fmt.Println(ns2)
 
-	var a ServerState = 5
-	ns3 := transition(a)
-	fmt.Println(ns3)
+	// var a ServerState = 5
+	// ns3 := transition(a)
+	// fmt.Println(ns3)
+
+}
+
+// Struct Embedding
+
+type base struct {
+	num int
+}
+
+func (b base) describe() string {
+	return fmt.Sprintf("base with num=%v", b.num)
+}
+
+// A container embeds a base. An embedding looks like a field without a name.
+type container struct {
+	base
+	num int
+	str string
+}
+
+func struct_embedding() {
+	function_call()
+
+	// When creating structs with literals, we have to initialize the embedding explicitly;
+	// here the embedded type serves as the field name.
+
+	co := container{
+		base: base{
+			num: 10,
+		},
+		num: 5,
+		str: "some name",
+	}
+
+	fmt.Println(co)
+	fmt.Println(co.num)
+	fmt.Println(co.str)
+
+	fmt.Printf("co={num: %v, str: %v}\n", co.num, co.str)
+	fmt.Println("also num:", co.base.num)
+
+	fmt.Println("describe:", co.describe())
+
+	type describer interface {
+		describe() string
+	}
+	// polymorphism
+	var d describer = co
+	fmt.Println(d)
+	fmt.Println("describer:", d.describe())
 
 }
