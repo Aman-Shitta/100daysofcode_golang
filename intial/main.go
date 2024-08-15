@@ -1093,8 +1093,21 @@ func MapKeys[K comparable, V any](m map[K]V) []K {
 	return r
 }
 
+// List[T]: This struct represents the entire linked list. It has two main pointers:
+// head: Points to the first element of the list.
+// tail: Points to the last element of the list.
 type List[T any] struct {
-	head, tail *element[T]
+	head *element[T] // pointer to first elmenmt
+	tail *element[T] // pointer to last elmenmt
+}
+
+// element[T]: This struct represents a single node in the linked list. It has:
+// val: The value stored in the node.
+// next: A pointer to the next node in the list.
+
+type element[T any] struct {
+	val  T
+	next *element[T]
 }
 
 func (lst *List[T]) Push(v T) {
@@ -1113,11 +1126,6 @@ func (lst *List[T]) GetAll() []T {
 		elems = append(elems, e.val)
 	}
 	return elems
-}
-
-type element[T any] struct {
-	next *element[T]
-	val  T
 }
 
 func Genrics() {
