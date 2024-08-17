@@ -40,6 +40,8 @@ func main() {
 	struct_embedding()
 	Genrics()
 	Errors()
+	CustomErrors()
+	Goroutines()
 }
 
 func function_call() {
@@ -559,6 +561,11 @@ func function() {
 	}
 
 	fmt.Println("Single value type declaration :: ", plusPlus(1, 2, 3))
+
+	// annonymous function with direct invocation
+	func(msg string) {
+		fmt.Println(msg)
+	}("going")
 }
 
 // Multiple Return Values
@@ -1192,4 +1199,60 @@ func Errors() {
 
 		fmt.Println("Tea is ready")
 	}
+}
+
+// Custom Errors
+
+type argError struct {
+	arg     int
+	message string
+}
+
+func (e *argError) Error() string {
+	return fmt.Sprintf("%d - %s", e.arg, e.message)
+}
+
+func CustomErrors() {
+	function_call()
+
+	f := func(arg int) (int, error) {
+		if arg == 42 {
+			return -1, &argError{arg, "Can not work with it"}
+		} else {
+			return arg + 3, nil
+		}
+	}
+
+	_, err := f(42)
+	var ae *argError
+	if errors.As(err, &ae) {
+		fmt.Println(ae.arg)
+		fmt.Println(ae.message)
+	} else {
+		fmt.Println("error doesn't match as argError")
+	}
+}
+
+//  Goroutines
+
+func f(from string) {
+	for i := 0; i <= 10; i++ {
+		fmt.Printf("%s : %d\n", from, i)
+	}
+}
+
+func Goroutines() {
+	function_call()
+
+	f("direct")
+
+	go f("goroutine")
+
+	go func(msg string) {
+		fmt.Println(msg)
+	}("going")
+
+	time.Sleep(time.Second)
+	fmt.Println("Done")
+
 }
