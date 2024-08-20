@@ -42,6 +42,7 @@ func main() {
 	Errors()
 	CustomErrors()
 	Goroutines()
+	Channels()
 }
 
 func function_call() {
@@ -1254,5 +1255,33 @@ func Goroutines() {
 
 	time.Sleep(time.Second)
 	fmt.Println("Done")
+
+}
+
+// Channels
+
+// Channels are the pipes that connect concurrent goroutines.
+// You can send values into channels from one goroutine and receive those values into another goroutine.
+
+func Channels() {
+	function_call()
+	// Create a new channel with make(chan val-type)
+	// Channels are typed by the values they convey
+	var messages = make(chan string)
+
+	// Send a valuein channel usin <- syntax
+	// Here we send "hello" to messages channel, from a new go routine
+	go func() {
+		messages <- "Hello"
+	}()
+
+	// The "<-channel" syntax recieved a value from channel.
+	// Here we'll recieve "Hello" message sent above
+	msg := <-messages
+	fmt.Println(msg)
+
+	// By default sends and receives block until both the sender and receiver are ready.
+	// This property allowed us to wait at the end
+	// of our program for the "Hello" message without having to use any other synchronization
 
 }
