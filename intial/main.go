@@ -15,39 +15,40 @@ func main() {
 	fmt.Println("Hello World !")
 	// tour based learning
 	// dividing each concept in functions
-	values()
-	variables()
-	constants()
-	for_loops()
-	if_else()
-	switch_statement()
-	arrays()
-	slicesAdvArr()
-	mapss()
-	range_fun()
-	function()
-	multipleReturnValue()
-	vardiacFunc()
-	closures()
-	recursion()
-	pointers()
-	stringsAndRunes()
-	_String()
-	structs()
-	methods()
-	interfaces()
-	enums()
-	struct_embedding()
-	Genrics()
-	Errors()
-	CustomErrors()
-	Goroutines()
-	Channels()
-	bufferedChannel()
-	channelSync()
-	channelDirections()
-	ChannelUnderstand()
-	Select()
+	// values()
+	// variables()
+	// constants()
+	// for_loops()
+	// if_else()
+	// switch_statement()
+	// arrays()
+	// slicesAdvArr()
+	// mapss()
+	// range_fun()
+	// function()
+	// multipleReturnValue()
+	// vardiacFunc()
+	// closures()
+	// recursion()
+	// pointers()
+	// stringsAndRunes()
+	// _String()
+	// structs()
+	// methods()
+	// interfaces()
+	// enums()
+	// struct_embedding()
+	// Genrics()
+	// Errors()
+	// CustomErrors()
+	// Goroutines()
+	// Channels()
+	// bufferedChannel()
+	// channelSync()
+	// channelDirections()
+	// ChannelUnderstand()
+	// Select()
+	Timeouts()
 }
 
 func function_call() {
@@ -1396,7 +1397,7 @@ func ChannelUnderstand() {
 
 // Go’s select lets you wait on multiple channel operations. Combining goroutines
 // and channels with select is a powerful feature of Go.
-
+// IMPORTANT NOTE* : Don't confuse slect with switch, select is specifically designed to handle multiple channels simultaneously.
 func Select() {
 	function_call()
 
@@ -1422,4 +1423,49 @@ func Select() {
 		}
 	}
 
+}
+
+// Timeouts
+
+// Timeouts are important for programs that connect to external resources
+// or that otherwise need to bound execution time.
+// Implementing timeouts in Go is easy and elegant thanks to channels and select.
+func Timeouts() {
+	function_call()
+
+	// For our example, suppose we’re executing an external call \
+	// that returns its result on a channel c1 after 2s.
+	// Note that the channel is buffered, so the send in the goroutine is nonblocking.
+	// This is a common pattern to prevent goroutine leaks in case the channel is never read.
+	c1 := make(chan string, 1)
+	go func() {
+		time.Sleep(2 * time.Second)
+		c1 <- "result 1"
+	}()
+
+	select {
+	case res := <-c1:
+		fmt.Println(res)
+	case <-time.After(1 * time.Second):
+		fmt.Println("timeout 1")
+	}
+
+	// Here’s the select implementing a timeout.
+	// res := <-c1 awaits the result
+	// and <-time.After awaits a value to be sent after the timeout of 1s.
+	// Since select proceeds with the first receive that’s ready,
+	// we’ll take the timeout case if the operation takes more than the allowed 1s.
+	c2 := make(chan string, 1)
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		c2 <- "result 2"
+	}()
+
+	select {
+	case res := <-c2:
+		fmt.Println(res)
+	case <-time.After(3 * time.Second):
+		fmt.Println("timeout 2")
+	}
 }
