@@ -50,7 +50,8 @@ func main() {
 	// Select()
 	// Timeouts()
 	// NonBlockingChannelOps()
-	closingChannels()
+	// closingChannels()
+	RangeOverChannels()
 }
 
 func function_call() {
@@ -1560,4 +1561,20 @@ func closingChannels() {
 	// generated because the channel is closed and empty.
 	_, ok := <-jobs
 	fmt.Println("recieved more jobs :", ok)
+}
+
+func RangeOverChannels() {
+	function_call()
+
+	// We'll iterate over 2 values in the queue channel
+
+	queue := make(chan string, 2)
+
+	queue <- "one"
+	queue <- "two"
+	close(queue)
+
+	for elem := range queue {
+		fmt.Println(elem)
+	}
 }
