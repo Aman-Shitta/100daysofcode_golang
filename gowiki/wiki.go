@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 )
 
 // Covered in this: https://go.dev/doc/articles/wiki/
@@ -25,6 +27,28 @@ type Page struct {
 	// The type []byte means "a byte slice"
 	Body []byte
 }
+
+// Validation
+
+// The function regexp.MustCompile will parse and compile the regular expression,
+// and return a regexp.Regexp. MustCompile is distinct from Compile in that it
+// will panic if the expression compilation fails, while Compile returns an
+// error as a second parameter.
+var validPath = regexp.MustCompile("^/(edit|view|save)/([A-Za-z0-9]+)$")
+
+func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
+	m := validPath.FindStringSubmatch(r.URL.Path)
+
+	if m == nil {
+		http.NotFound(w, r)
+		return "", errors.New("invalid page title")
+	}
+	return m[2], nil // Title is the second sub-expression
+}
+
+var templates = template.Must(
+	template.ParseFiles("edit.html", "view.html"),
+)
 
 // The Page struct describes how page data will be stored in memory.
 // But what about persistent storage? We can address that by creating a save method on Page:
@@ -63,8 +87,16 @@ func loadPage(title string) (*Page, error) {
 
 // Render a template for page title and body
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, _ := template.ParseFiles(tmpl)
-	t.Execute(w, p)
+	// t, err := template.ParseFiles(tmpl)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	err := templates.ExecuteTemplate(w, tmpl+".html", p)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // func main() {
@@ -76,15 +108,20 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 // }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/view/"):]
+	// title := r.URL.Path[len("/view/"):]
+	title, err := getTitle(w, r)
+	if err != nil {
+		return
+	}
 	p, err := loadPage(title)
 
+	// handle non-existent pages
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, 404)
 	}
 	// t, _ := template.ParseFiles("templtes/view.html")
 	// t.Execute(w, p)
-	tmpl := "view.html"
+	tmpl := "view"
 	renderTemplate(w, tmpl, p)
 	// fmt.Fprintf(w, "<h1>%s</h1><br><div>%s</div>", p.Title, string(p.Body))
 
@@ -108,7 +145,11 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 // }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/edit/"):]
+	// title := r.URL.Path[len("/edit/"):]
+	title, err := getTitle(w, r)
+	if err != nil {
+		return
+	}
 
 	p, err := loadPage(title)
 
@@ -118,19 +159,35 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 	// t, _ := template.ParseFiles("templates/edit.html")
 	// t.Execute(w, p)
-	tmpl := "edit.html"
+	tmpl := "edit"
 	renderTemplate(w, tmpl, p)
 
 }
 
-// func saveHandler(w http.ResponseWriter, r *http.Request) {
+// Saving pages
 
-// }
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	// title := r.URL.Path[len("/save/"):]
+	title, err := getTitle(w, r)
+	if err != nil {
+		return
+	}
+	body := r.FormValue("body")
+
+	p := &Page{Title: title, Body: []byte(body)}
+	err = p.save()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+}
 
 func main() {
 
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
-	// http.HandleFunc("/save/", saveHandler)
+	http.HandleFunc("/save/", saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
