@@ -47,7 +47,7 @@ func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
 }
 
 var templates = template.Must(
-	template.ParseFiles("edit.html", "view.html"),
+	template.ParseFiles("tmpl/edit.html", "tmpl/view.html"),
 )
 
 // The Page struct describes how page data will be stored in memory.
@@ -74,7 +74,7 @@ func (p *Page) save() error {
 
 func loadPage(title string) (*Page, error) {
 
-	filename := title + ".txt"
+	filename := "data/" + title + ".txt"
 
 	body, err := os.ReadFile(filename)
 
@@ -107,12 +107,33 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 // 	fmt.Println(string(p2.Body))
 // }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	// title := r.URL.Path[len("/view/"):]
-	title, err := getTitle(w, r)
-	if err != nil {
-		return
+// Function definition
+
+// func viewHandler(w http.ResponseWriter, r *http.Request, title string)
+// func editHandler(w http.ResponseWriter, r *http.Request, title string)
+// func saveHandler(w http.ResponseWriter, r *http.Request, title string)
+
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// here we will extract the page title from the Request,
+		// and call the provided handler fn
+
+		m := validPath.FindStringSubmatch(r.URL.Path)
+
+		if m == nil {
+			http.NotFound(w, r)
+			return
+		}
+		fn(w, r, m[2])
 	}
+}
+
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
+	// title := r.URL.Path[len("/view/"):]
+	// title, err := getTitle(w, r)
+	// if err != nil {
+	// 	return
+	// }
 	p, err := loadPage(title)
 
 	// handle non-existent pages
@@ -144,12 +165,12 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 // 		p.Title, p.Body)
 // }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	// title := r.URL.Path[len("/edit/"):]
-	title, err := getTitle(w, r)
-	if err != nil {
-		return
-	}
+	// title, err := getTitle(w, r)
+	// if err != nil {
+	// 	return
+	// }
 
 	p, err := loadPage(title)
 
@@ -166,16 +187,16 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 // Saving pages
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	// title := r.URL.Path[len("/save/"):]
-	title, err := getTitle(w, r)
-	if err != nil {
-		return
-	}
+	// title, err := getTitle(w, r)
+	// if err != nil {
+	// 	return
+	// }
 	body := r.FormValue("body")
 
 	p := &Page{Title: title, Body: []byte(body)}
-	err = p.save()
+	err := p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -184,10 +205,14 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+func rootRedirectHandler(w http.ResponseWriter, r *http.Request, title string) {
+}
+
 func main() {
 
-	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/edit/", editHandler)
-	http.HandleFunc("/save/", saveHandler)
+	http.HandleFunc("/view/", makeHandler(viewHandler))
+	http.HandleFunc("/edit/", makeHandler(editHandler))
+	http.HandleFunc("/save/", makeHandler(saveHandler))
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
