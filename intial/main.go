@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello World !")
+	// fmt.Println("Hello World !")
 	// tour based learning
 	// dividing each concept in functions
 	// values()
@@ -51,7 +51,9 @@ func main() {
 	// Timeouts()
 	// NonBlockingChannelOps()
 	// closingChannels()
-	RangeOverChannels()
+	// RangeOverChannels()
+	// Timers()
+	Tickers()
 }
 
 func function_call() {
@@ -1577,4 +1579,64 @@ func RangeOverChannels() {
 	for elem := range queue {
 		fmt.Println(elem)
 	}
+}
+
+func Timers() {
+	function_call()
+	// We often want code to execute at some point into the future.
+	// or repeadtedly at some interval. Go's builin timer and ticker
+	// features make both of these tasks easy.
+
+	// Timer represents a single event in the future
+	// You tell the timer how long you  wnat to wait, and
+	// it provides a cha
+	timer1 := time.NewTimer(time.Second * 2)
+
+	// The <-timer1.C blocks on the timer’s channel C until
+	// it sends a value indicating that the timer fired.
+	<-timer1.C
+	fmt.Println("TImes 1 fired")
+
+	timer2 := time.NewTimer(time.Second * 1)
+
+	go func() {
+		<-timer2.C
+		fmt.Println("Timer 2 Fired")
+	}()
+
+	stop2 := timer2.Stop()
+
+	if stop2 {
+		fmt.Println("Timer 2 Stopped")
+	}
+
+	time.Sleep(time.Second * 2)
+}
+
+func Tickers() {
+	// Timers are when you wnat to do something in futture
+	// tickers are for when you wnat something to be done
+	// repeadetly at regular intertvals. unltil we stop it.
+
+	function_call()
+
+	ticker := time.NewTicker(time.Millisecond * 500)
+
+	done := make(chan bool)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case t := <-ticker.C:
+				fmt.Println("Tick at :", t)
+			}
+		}
+	}()
+
+	time.Sleep(time.Millisecond * 1600)
+	ticker.Stop()
+	done <- true
+	fmt.Println("Ticker stopped")
 }
