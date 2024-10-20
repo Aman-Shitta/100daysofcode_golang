@@ -7,6 +7,7 @@ import (
 	"math"
 	"runtime"
 	"slices"
+	"sync"
 	"time"
 	"unicode/utf8"
 )
@@ -53,7 +54,9 @@ func main() {
 	// closingChannels()
 	// RangeOverChannels()
 	// Timers()
-	Tickers()
+	// Tickers()
+	// WorkerPools()
+	WaitGroups()
 }
 
 func function_call() {
@@ -1639,4 +1642,75 @@ func Tickers() {
 	ticker.Stop()
 	done <- true
 	fmt.Println("Ticker stopped")
+}
+
+func WorkerPools() {
+	function_call()
+
+	// Implementing a workerpool using goroutines and channels.
+
+	worker := func(id int, jobs <-chan int, results chan<- int) {
+		for j := range jobs {
+			fmt.Println("worker", id, "started job", j)
+			time.Sleep(time.Second)
+			fmt.Println("worker", id, "finished job", j)
+
+			results <- j * 2
+		}
+	}
+
+	const numJobs = 5
+	// In order to use our pool of workers we need to send them work
+	// and collect their results. We make 2 channels for this.
+	jobs := make(chan int, numJobs)
+	results := make(chan int, numJobs)
+
+	// This starts up 3 workers,
+	// initially blocked because there are no jobs yet.
+	for w := 1; w <= 3; w++ {
+		go worker(w, jobs, results)
+	}
+
+	// Here we send 5 jobs and then close that channel
+	// to indicate that’s all the work we have.
+	for j := 1; j <= numJobs; j++ {
+		jobs <- j
+	}
+
+	close(jobs)
+
+	// Finally we collect all the results of the work.
+	// This also ensures that the worker goroutines have finished.
+	// An alternative way to wait for multiple goroutines
+	// is to use a WaitGroup.
+	for a := 1; a <= numJobs; a++ {
+		<-results
+	}
+
+}
+
+func WaitGroups() {
+	function_call()
+
+	// to wait for multiple goroutines to finsih we can use a waitgroup
+
+	worker := func(id int) {
+		time.Sleep(time.Second)
+		fmt.Printf("Worker %d starting\n", id)
+		time.Sleep(time.Second)
+		fmt.Printf("Worker %d finished\n", id)
+	}
+
+	var wg sync.WaitGroup
+
+	for i := 1; i <= 5; i++ {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			worker(i)
+		}()
+	}
+
+	wg.Wait()
 }
